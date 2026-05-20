@@ -1,0 +1,107 @@
+'use client';
+
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
+
+export default function Home() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [view, setView] = useState('home'); // 'home' or 'auth'
+  const [isLoginMode, setIsLoginMode] = useState(false);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Note: Ensure your Supabase bucket is named 'cv-bucket'
+    const { error } = await supabase.storage.from('cv-bucket').upload(`public/${Date.now()}_${file.name}`, file);
+    
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
+      alert('File uploaded successfully!');
+    }
+  };
+
+  return (
+    <main>
+      {view === 'auth' ? (
+        <div className="auth-page">
+          <div className="auth-container">
+            <button className="back-link" onClick={() => setView('home')}>
+              <i className="fa-solid fa-arrow-left"></i> Back to Home
+            </button>
+            <div className="auth-box">
+              <div className="auth-header">
+                <h2>Elevare <span>Tech</span></h2>
+                <p>{isLoginMode ? 'Log in to your account' : 'Create your account'}</p>
+              </div>
+              <div className="auth-tabs">
+                <button className={`auth-tab ${!isLoginMode ? 'active' : ''}`} onClick={() => setIsLoginMode(false)}>Sign Up</button>
+                <button className={`auth-tab ${isLoginMode ? 'active' : ''}`} onClick={() => setIsLoginMode(true)}>Log In</button>
+              </div>
+              <form onSubmit={(e) => e.preventDefault()}>
+                {!isLoginMode && <div className="input-group"><label>Full Name</label><input type="text" placeholder="John Doe" /></div>}
+                <div className="input-group"><label>Email address</label><input type="email" placeholder="name@example.com" required /></div>
+                <div className="input-group"><label>Password</label><input type="password" placeholder="••••••••" required /></div>
+                <button type="submit" className="btn-primary" style={{ width: '100%' }}>{isLoginMode ? 'Log In' : 'Create account'}</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <header className="navbar">
+            <div className="logo"><a href="#" onClick={() => setView('home')} style={{ textDecoration: 'none', color: 'inherit' }}><h2>Elevare <span>Tech</span></h2></a></div>
+            <nav className="desktop-nav">
+              <a href="#how-it-works">How It Works</a>
+              <a href="#pricing">Pricing</a>
+              <button className="nav-login" onClick={() => { setView('auth'); setIsLoginMode(true); }} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>Log In</button>
+            </nav>
+            <div className="menu-icon" onClick={() => setIsMenuOpen(true)}><i className="fa-solid fa-bars"></i></div>
+          </header>
+
+          <section className="hero">
+            <div className="hero-content">
+              <div className="badge">DESIGNED FOR THE SCROLL GENERATION</div>
+              <h1>Land your <br />dream job. <br /><span className="highlight">Faster.</span></h1>
+              <p>A mobile-first experience. AI matches. Smart tools. More interviews. Upload your CV and let our AI find your perfect fit.</p>
+              <div className="hero-buttons">
+                <input type="file" id="cv-upload-input" accept=".pdf,.doc,.docx" hidden onChange={handleFileUpload} />
+                <button className="btn-primary" onClick={() => document.getElementById('cv-upload-input')?.click()}>Upload CV <i className="fa-solid fa-cloud-arrow-up"></i></button>
+                <button className="btn-secondary" onClick={() => { setView('auth'); setIsLoginMode(false); }}>Sign Up Free</button>
+              </div>
+            </div>
+            <div className="hero-visual">
+              <div className="swipe-card">
+                <h3>Junior UX Designer</h3>
+                <p className="company">Google</p>
+                <p className="location"><i className="fa-solid fa-location-dot"></i> London, UK • Full-time</p>
+                <div className="match-score"><i className="fa-solid fa-check"></i> 95% Match</div>
+                <p className="salary">£28K – £35K</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="how-it-works" className="how-it-works">
+            <h2>How It Works</h2>
+            <div className="steps-grid">
+              <div className="step-card"><div className="icon-box"><i className="fa-solid fa-file-arrow-up"></i></div><h4>1. Upload CV</h4></div>
+              <div className="step-card"><div className="icon-box"><i className="fa-solid fa-microchip"></i></div><h4>2. AI Parsing</h4></div>
+              <div className="step-card"><div className="icon-box"><i className="fa-solid fa-bullseye"></i></div><h4>3. Get Scored</h4></div>
+              <div className="step-card"><div className="icon-box"><i className="fa-solid fa-mobile-screen"></i></div><h4>4. Daily Feed</h4></div>
+            </div>
+          </section>
+
+          <section id="pricing" className="pricing">
+            <h2>Choose your plan</h2>
+            <div className="pricing-grid">
+              <div className="price-card"><h3>Free</h3><p className="price">$0</p><button className="btn-secondary" onClick={() => { setView('auth'); setIsLoginMode(false); }}>Get Started</button></div>
+              <div className="price-card popular"><h3>Bronze</h3><p className="price">$9.99</p><button className="btn-primary" onClick={() => { setView('auth'); setIsLoginMode(false); }}>Get Started</button></div>
+              <div className="price-card"><h3>Gold</h3><p className="price">$29.99</p><button className="btn-secondary" onClick={() => { setView('auth'); setIsLoginMode(false); }}>Get Started</button></div>
+            </div>
+          </section>
+        </>
+      )}
+    </main>
+  );
+}
